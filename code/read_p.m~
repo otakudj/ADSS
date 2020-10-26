@@ -1,0 +1,86 @@
+clear all;
+addpath('train/TUD-Campus/det');
+det_dir=dir('train/TUD-Campus/alfd');
+det_len=length(det_dir);
+addpath('train/TUD-Campus/det');
+det=cell(1,det_len-2);
+for i=1:det_len-2   
+    det{i}=dlmread(sprintf('det%.6d.txt',i));
+    len(i)=size(det{i},1);
+end
+
+addpath('train/TUD-Campus')
+directory=dir('train/TUD-Campus/alfd');
+fr_len=length(directory);
+addpath('train/TUD-Campus/alfd');
+det_len=sum(len);
+alfd=cell(det_len,det_len);
+for i=1:fr_len-2
+    fid=fopen(sprintf('%.8d.txt',i-1));
+    while ~feof(fid)
+        line=fgetl(fid);
+        p=textscan(line,'%d %*c');
+        p=cell2mat(p);
+        det1=det_ind(p(1)+1,p(2)+1,det);
+        det2=det_ind(p(3)+1,p(4)+1,det);
+        fea=zeros(p(5),1);
+        for j=6:2:length(p)-1
+            fea(p(j)+1)=p(j+1);
+        end
+        alfd{det1,det2}=fea;
+    end
+    fclose(fid);
+end
+
+p=cell(det_len,det_len);
+lam=20;
+for i=1:det_len
+    for j=i+1:det_len
+        if ~isempty(alfd{i,j})
+            pij=alfd{i,j};
+            pji=alfd{j,i};
+            p{i,j}=(pij+pji)/(sum(pij)+sum(pji)+lam);
+        end
+    end
+end
+
+
+addpath('alfds');
+for num=1:5
+temp=dlmread(sprintf('alfdmodel%.2d.txt',num-1),' ',2,0);
+W(5-num+1,:)=temp(1,1:288);
+end
+
+a=zeros(det_len,det_len);
+for i=1:det_len
+    for j=1:det_len
+        if ~isempty(p{i,j})
+            delta=fr_ind(j,len)-fr_ind(i,len);
+            switch(delta)
+                case 1
+                    a(i,j)=W(1,:)*p{i,j};
+                case 2
+                    a(i,j)=W(2,:)*p{i,j};
+                case 5
+                    a(i,j)=W(3,:)*p{ij}
+            
+
+            
+        
+% p_plus_p=cell2mat(alfd)+cell2mat(alfd');
+
+function y=det_ind(frame,num,len)
+y=0;
+for i=1:frame-1
+    y=y+len(i);
+end
+y=y+num;
+end
+
+function y=fr_ind(det_ind,len)
+y=1;
+while det_ind>0
+    det_ind=det_ind-len(y);
+    y=y+1;
+end
+end

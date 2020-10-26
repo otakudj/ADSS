@@ -1,0 +1,27 @@
+----------------------------------------------------------------------------------------------------------
+    ALFD Features for MOT dataset. 
+    REF: Wongun Choi, Near-Online Multi-target Tracking with Aggregated Local Flow Descriptor, ICCV, 2015
+    Wongun Choi, wongun@nec-labs.com
+----------------------------------------------------------------------------------------------------------
+
+This package contains the ALFD descriptor outputs for all possible pair of detections (between frame distance 1,2,5,10,20) in the MOT dataset.
+The intent of this package is to facilitate the research in MOT by sharing the feature inputs. 
+The reference detections are obtained at Nov 2014. I will update the features, once updated reference detections become available. 
+
+The data is organized as follows:
+
+1. $SET/$SEQNAME/det/: 
+    - Each file contains the reference detections reorganized into each frame. The order of detections in the file corresponds to the id in ALFD feature file, i.e., the first detection in each detection file corresponds to the DETID = 0.
+    - Each line corespond to one detection:
+    X1, Y1, X2, Y2, DUMMY, SCORE, TYPE (person=1)
+    - These detections are the exact copies of original reference detections. We reorganize them just to clarify the correspondence between detections and computed ALFDs.
+
+2. $SET/$SEQNAME/alfd/$FRAME.txt: 
+    - The files contain all ALFD descriptors from detections in $FRAME to the other detections in $FRAME+1, $FRAME+2, ..., $FRAME+20.
+    - Each line correspond to one ALFD descriptor:
+    #FRAME, #DETID, #FRAME, #DETID, ALFD (sparse format, i.e., bin_index:ipt count)
+    - We use sparse format for the ALFD to avoid large files. 
+
+3. "alfds" directory contains the learned model that are dot-producted with the ALFD to produce the affinity measure. 
+
+Both the models and ALFD descriptors are defined to have 4x4 spatial grids inside of the detection boxes and 2 outer regions that results in (4x4)x(4x4+2)=288 dimensional vectors.
